@@ -4,6 +4,7 @@ const path = require('path');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const collection = client.db("wellnation_db").collection("post");
 
 // 정적 파일 미들웨어 설정을 '/' 경로로 한정합니다.
 app.use(express.static(path.join(__dirname, 'app/dist')));
@@ -51,5 +52,31 @@ const startServer = async () => {
     });
   }
   
+
+  // 데이터 추가하기 엔드포인트
+app.post('/api/post', async (req, res) => {
+  try {
+    const post = { name: req.body.name }; // 여기서 'post' 객체를 생성
+    const result = await collection.insertOne(post);
+    res.status(201).send(result.ops[0]);
+  } catch (error) {
+    console.error("Failed to insert post", error);
+    res.status(500).send(error);
+  }
+});
+
+// 데이터 가져오기 엔드포인트
+app.get('/api/post', async (req, res) => {
+  try {
+    const posts = await collection.find({}).toArray();
+    res.json(posts);
+  } catch (error) {
+    console.error("Failed to retrieve post", error);
+    res.status(500).send(error);
+  }
+});
+
   startServer().catch(console.error);
+
+
   
